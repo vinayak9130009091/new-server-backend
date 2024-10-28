@@ -52,7 +52,7 @@ const getAccounts = async (req, res) => {
             .populate({ path: 'tags', model: 'Tags' })
             .populate({ path: 'teamMember', model: 'User' })
             .populate({ path: 'contacts', model: 'Contacts' })
-            .populate({ path: 'companyAddress', model: 'CompanyAddresses' }); 
+            .populate({ path: 'companyAddress', model: 'companyAddress' }); 
         //sort({ createdAt: -1 });
         res.status(200).json({ message: "Accounts retrieved successfully", accounts })
 
