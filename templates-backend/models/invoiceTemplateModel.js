@@ -88,6 +88,9 @@ const invoiceTemplateSchema = new mongoose.Schema({
     summary: {
         type: summarySchema,
     },
+    clientNote: {
+        type: String,
+    },
 
 }, { timestamps: true });
 
