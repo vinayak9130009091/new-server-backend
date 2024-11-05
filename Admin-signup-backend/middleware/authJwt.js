@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 const tokenBlacklist = []; // Array to store invalidated tokens
 const secretKey = process.env.TOKEN_KEY;
 
@@ -7,7 +7,7 @@ function validateToken(req, res, next) {
   const token = req.headers.authorization;
 
   if (!token) {
-    return res.status(401).json({ message: 'Token is missing' });
+    return res.status(401).json({ message: "Token is missing" });
   }
 
   // Check if token is in the blacklist
@@ -17,7 +17,7 @@ function validateToken(req, res, next) {
 
   jwt.verify(token, secretKey, (err, decoded) => {
     if (err) {
-      return res.status(400).json({ message: 'Invalid token' });
+      return res.status(400).json({ message: "Invalid token" });
     }
     //const token = token;
     req.user = decoded; // Attach decoded user information to the request object
@@ -25,14 +25,13 @@ function validateToken(req, res, next) {
   });
 }
 
-
 // Function to remove expired or unnecessary tokens from the blacklist
 function cleanupBlacklist() {
   // Get the current timestamp
   const currentTime = Date.now();
 
   // Filter out tokens that are expired or no longer needed
-  tokenBlacklist = tokenBlacklist.filter(token => {
+  tokenBlacklist = tokenBlacklist.filter((token) => {
     // Parse the token to extract the expiration time (if available)
     const decodedToken = jwt.decode(token, { complete: true });
     const expirationTime = decodedToken?.payload?.exp * 1000; // Convert expiration time to milliseconds
@@ -45,7 +44,6 @@ function cleanupBlacklist() {
   });
 }
 
-
 // Handle user logout
 const logout = async (req, res) => {
   const token = req.headers.authorization; // Assuming token is sent in the Authorization header
@@ -53,7 +51,5 @@ const logout = async (req, res) => {
   tokenBlacklist.push(token);
   res.status(200).json({ status: 200, message: "User logged out successfully." });
 };
-
-
 
 module.exports = { validateToken, logout, cleanupBlacklist };
