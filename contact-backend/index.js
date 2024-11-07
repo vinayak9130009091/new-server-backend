@@ -5,6 +5,7 @@ const cors = require('cors');
 const contactRoutes = require('./routers/contactRoutes');
 const AccountsRoutes = require('./routers/AccountsRoutes');
 const AssignTags = require('./middleware/assignbulktags')
+const manageTeamMember = require("./middleware/manageTeamMember");
 const mongoose = require('mongoose');
 
 // Middleware
@@ -16,7 +17,7 @@ app.use('/contacts', contactRoutes)
 
 app.use('/accounts', AccountsRoutes)
 
-app.use('/', AssignTags)
+// app.use('/', AssignTags)
 
 //! assignbulktags Routes
 const assignbulktags = require("./middleware/assignbulktags");
@@ -41,6 +42,8 @@ app.use((req, res, next) => {
 dbconnect()
 
 
+app.use("/manageteammember", manageTeamMember);
+app.use('/', AssignTags)
 const port = process.env.PORT || 7000;
 
 app.listen(port, ()=>{

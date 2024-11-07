@@ -1,96 +1,103 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const jobTemplateSchema = new mongoose.Schema({
+const jobTemplateSchema = new mongoose.Schema(
+  {
     templatename: {
-        type: String,
-        required: [true, 'Template name is required'],
-        trim: true
+      type: String,
+      required: [true, "Template name is required"],
+      trim: true,
     },
     jobname: {
-        type: String,
+      type: String,
     },
 
     addshortcode: {
-        type: String,
+      type: String,
     },
 
-    jobassignees: [{
+    jobassignees: [
+      {
         type: Array,
         type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    }],
+        ref: "User",
+      },
+    ],
 
     priority: {
-        type: String,
-        },
+      type: String,
+    },
     description: {
-        type: String,
+      type: String,
     },
     absolutedates: {
-        type: Boolean,
-        required: [true, 'Absolute dates flag is required']
+      type: Boolean,
+      required: [true, "Absolute dates flag is required"],
     },
     startsin: {
-        type: Number,
-        // required: function () {
-        //     return !this.absolutedates;
-        // },
-        min: [0, 'Starts in must be a positive number']
+      type: Number,
+      // required: function () {
+      //     return !this.absolutedates;
+      // },
+      min: [0, "Starts in must be a positive number"],
     },
     startsinduration: {
-        type: String,
-        // required: function () {
-        //     return !this.absolutedates;
-        // }
+      type: String,
+      // required: function () {
+      //     return !this.absolutedates;
+      // }
     },
     duein: {
-        type: Number,
-        // required: function () {
-        //     return !this.absolutedates;
-        // },
-        min: [0, 'Due in must be a positive number']
+      type: Number,
+      // required: function () {
+      //     return !this.absolutedates;
+      // },
+      min: [0, "Due in must be a positive number"],
     },
     dueinduration: {
-        type: String,
-        // required: function () {
-        //     return !this.absolutedates;
-        // }
+      type: String,
+      // required: function () {
+      //     return !this.absolutedates;
+      // }
     },
     startdate: {
-        type: Date,
-        // required: function () {
-        //     return this.absolutedates;
-        // }
+      type: Date,
+      // required: function () {
+      //     return this.absolutedates;
+      // }
     },
     enddate: {
-        type: Date,
-        // required: function () {
-        //     return this.absolutedates;
-        // }
+      type: Date,
+      // required: function () {
+      //     return this.absolutedates;
+      // }
     },
-    comments:[{
-        type: String
-    }],
-     showinclientportal: {
-        type: Boolean
+    comments: [
+      {
+        type: String,
+      },
+    ],
+    showinclientportal: {
+      type: Boolean,
     },
 
     jobnameforclient: {
-        type: String
+      type: String,
     },
 
     clientfacingstatus: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ClientFacingjobStatus',
-    },
-clientfacingDescription:{
-    type:String
-},
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ClientFacingjobStatus",
+    },
+    clientfacingDescription: {
+      type: String,
+    },
     active: {
-        type: Boolean,
-        default: true
-    }
-}, { timestamps: true });
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true }
+);
 
-const JobTemplate = mongoose.model('JobTemplate', jobTemplateSchema);
+const JobTemplate = mongoose.model("JobTemplate", jobTemplateSchema);
 module.exports = JobTemplate;
