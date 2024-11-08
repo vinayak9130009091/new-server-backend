@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Accounts = require("../Models/AccountModel");
 const User = require("../Models/userModel");
 const Tags = require("../Models/tagsModel");
+const ClientFacingjobStatus = require("../Models/clientfacingjobstatusesModel.js");
 //get all JobTemplate
 const getJobs = async (req, res) => {
   try {
@@ -202,6 +203,83 @@ const getJobList = async (req, res) => {
   }
 };
 
+const getActiveJobList = async (req, res) => {
+  try {
+    const { isActive } = req.params;
+    const jobs = await Job.find({ active: isActive })
+      .populate({ path: "accounts", model: "Accounts" })
+      .populate({ path: "pipeline", model: "pipeline", populate: { path: "stages", model: "stage" } })
+      .populate({ path: "jobassignees", model: "User" })
+      .populate({ path: "clientfacingstatus", model: "ClientFacingjobStatus" });
+    const jobList = [];
+
+    for (const job of jobs) {
+      // Fetching the pipeline document for each job
+      const pipeline = await Pipeline.findById(job.pipeline);
+
+      if (!pipeline) {
+        // If pipeline is not found, skip this job
+        continue;
+      }
+
+      const jobAssigneeNames = job.jobassignees.map((assignee) => assignee.username);
+
+      const accountsname = job.accounts.map((account) => account.accountName);
+      const accountId = job.accounts.map((account) => account._id);
+
+      let stageNames = null;
+
+      if (Array.isArray(job.stageid)) {
+        // Iterate over each stage ID and find the corresponding stage name
+        stageNames = [];
+        for (const stageId of job.stageid) {
+          const matchedStage = pipeline.stages.find((stage) => stage._id.equals(stageId));
+          if (matchedStage) {
+            stageNames.push(matchedStage.name);
+          }
+        }
+      } else {
+        // If job.stageid is not an array, convert it to an array containing a single element
+        const matchedStage = pipeline.stages.find((stage) => stage._id.equals(job.stageid));
+        if (matchedStage) {
+          stageNames = [matchedStage.name];
+        }
+      }
+      const clientFacingStatus = job.clientfacingstatus
+        ? {
+            statusId: job.clientfacingstatus._id,
+            statusName: job.clientfacingstatus.clientfacingName,
+            statusColor: job.clientfacingstatus.clientfacingColour,
+            // description: job.clientfacingstatus.description,
+            // Include other fields from clientfacingstatus as needed
+          }
+        : null;
+      jobList.push({
+        id: job._id,
+        Name: job.jobname,
+        JobAssignee: jobAssigneeNames,
+        Pipeline: pipeline ? pipeline.pipelineName : null,
+        Stage: stageNames,
+        Account: accountsname,
+        AccountId: accountId,
+        ClientFacingStatus: clientFacingStatus,
+        StartDate: job.startdate,
+        DueDate: job.enddate,
+        Priority: job.priority,
+        Description: job.description,
+        StartsIn: job.startsin ? `${job.startsin} ${job.startsinduration}` : null,
+        DueIn: jobs.duein ? `${jobs.duein} ${jobs.dueinduration}` : null,
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt,
+      });
+    }
+
+    res.status(200).json({ message: "JobTemplate retrieved successfully", jobList });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getJobListbyid = async (req, res) => {
   const { id } = req.params;
   try {
@@ -215,8 +293,8 @@ const getJobListbyid = async (req, res) => {
         },
       })
       .populate({ path: "pipeline", model: "pipeline", populate: { path: "stages", model: "stage" } })
-      .populate({ path: "jobassignees", model: "User" });
-
+      .populate({ path: "jobassignees", model: "User" })
+      .populate({ path: "clientfacingstatus", model: "ClientFacingjobStatus" });
     const pipeline = await Pipeline.findById(jobs.pipeline);
 
     let stageNames = null;
@@ -251,7 +329,10 @@ const getJobListbyid = async (req, res) => {
       StartsIn: jobs.startsin ? `${jobs.startsin} ${jobs.startsinduration}` : null,
       DueIn: jobs.duein ? `${jobs.duein} ${jobs.dueinduration}` : null,
       Priority: jobs.priority,
-
+      ClientFacingStatus: jobs.clientfacingstatus,
+      ClientFacingDecription: jobs.clientfacingDescription,
+      jobClientName: jobs.jobnameforclient,
+      ShowinClientPortal: jobs.showinclientportal,
       Description: jobs.description,
       createdAt: jobs.createdAt,
       updatedAt: jobs.updatedAt,
@@ -292,4 +373,5 @@ module.exports = {
   getJobList,
   getJobListbyid,
   updatestgeidtojob,
+  getActiveJobList,
 };
